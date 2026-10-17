@@ -23,7 +23,7 @@ claw_solenoid = DigitalOut(brain.three_wire_port.a)
 
 lift_motor_left = Motor(Ports.PORT20)
 # right motor is reverse due to the motors facing opposite directions on the lift
-lift_motor_right = Motor(Ports.PORT21)
+lift_motor_right = Motor(Ports.PORT19)
 
 def close_claw():
     claw_solenoid.set(True)
@@ -65,11 +65,11 @@ def lift_down(speed, degrees):
 
 
 def control_lift(drive_train_controls_active):
-    if controller.buttonL1.pressing():
+    if controller.buttonR2.pressing():
         drive_train_controls_active = True
         lift_motor_left.spin(FORWARD,80, PERCENT, wait =False)
         lift_motor_right.spin(REVERSE,80, PERCENT)
-    elif controller.buttonR1.pressing():
+    elif controller.buttonL2.pressing():
         drive_train_controls_active = True
         lift_motor_left.spin(REVERSE, 80, PERCENT, wait=False)
         lift_motor_right.spin(FORWARD, 80, PERCENT)
@@ -142,7 +142,7 @@ def control_claw_roll(roll_joystick_active):
     return roll_joystick_active
 
 
-#def move_lift_and_pitch_to_position(pitch_joystick_active, drive_train_controls_active):
+def move_lift_and_pitch_to_position(pitch_joystick_active, drive_train_controls_active):
 
     if controller.buttonUp.pressing():
         # Disable joystick until outside of deadzone
@@ -198,13 +198,17 @@ def drive_code():
 
     if left_speed == 0:
         left_rear.stop(BRAKE)
-    else:
+    elif left_speed > 0:
         left_rear.spin(FORWARD, left_speed, PERCENT)
+    else:
+        left_rear.spin(REVERSE, -left_speed, PERCENT)
 
     if right_speed == 0:
         right_rear.stop(BRAKE)
+    elif right_speed > 0:
+        right_rear.spin(REVERSE, right_speed, PERCENT)
     else:
-        right_rear.spin(FORWARD, right_speed, PERCENT)
+        right_rear.spin(FORWARD, -right_speed, PERCENT)
 
 # This function is used durng the autonomous period.
 # The lift and drivetrain can be programmed here later.
@@ -246,10 +250,10 @@ def user_control():
         pitch_joystick_active, drive_train_controls_active = move_lift_and_pitch_to_position(
             pitch_joystick_active, drive_train_controls_active)
 
-        if controller.buttonL2.pressing():
+        if controller.buttonL1.pressing():
             close_claw()
 
-        if controller.buttonR2.pressing():
+        if controller.buttonR1.pressing():
             open_claw()
 
         wait(100, MSEC)
